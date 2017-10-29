@@ -1,3 +1,5 @@
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -26,38 +28,69 @@ public class Ex_p06_CottageScrapper {
         String refType = scanner.nextLine();
         int minL = Integer.parseInt(scanner.nextLine());
 
-        System.out.println(stock);
+//        System.out.println(stock);
 
+        int sumOfAllLogs = 0;
+        double pricePerMeter = 0.0;
+
+        for (ArrayList<Integer> arrayOfValues : stock.values()) {
+            sumOfAllLogs += arrayOfValues.stream().mapToInt(Integer::valueOf).sum();
+        }
+//        System.out.println(sumOfAllLogs);
+
+        int logCountTotal = 0;
+        for (ArrayList<Integer> valueArr : stock.values()) {
+            logCountTotal += valueArr.size();
+        }
+        // System.out.println(logCountTotal);
+
+//        втори вариант за смятанане на общия брой дърва
+//        int totalLogs = stock.values().stream().mapToInt(List::size).sum();
+//        System.out.println(totalLogs);
+
+        DecimalFormat df = new DecimalFormat("###################.00");
+        pricePerMeter = (double) sumOfAllLogs / logCountTotal;
+        double pricePerMeterRounded = Double.valueOf(df.format(pricePerMeter));
+//        System.out.println(pricePerMeterRounded);
+
+//                df.setRoundingMode(RoundingMode.CEILING);
+        System.out.printf("Price per meter: $%.2f%n", pricePerMeterRounded);
 
         ArrayList<Integer> selectMaterial = new ArrayList<>();
         //selectMaterial =
         stock.entrySet().stream()
                 .filter(x -> x.getKey().equals(refType))
-                .forEach(r -> r.getValue().stream().map(Integer::valueOf).filter(z -> z >= 12)
+                .forEach(r -> r.getValue().stream().map(Integer::valueOf).filter(z -> z >= minL)
                         .forEach(t -> selectMaterial.add(t)));
 
-        System.out.println(selectMaterial);
+//        System.out.println(selectMaterial);
 
-//        ArrayList<Integer> test = new ArrayList<>();
-//        test.add(4);
-//        test.add(45);
-//        test.add(11);
-//        test.add(25);
-//
-//        System.out.println(test);
-//
-//        test.remove((Integer) 11);
-//        System.out.println(test);
+        for (int i = 0; i < stock.get(refType).size(); i++) {
+            if (stock.get(refType).get(i) >= minL) {
+                stock.get(refType).remove(i);
+                i=i-1;
+            }
+        }
 
-//        ArrayList<Integer> shortOfSelectedType = new ArrayList<>();
-//        stock.entrySet().stream()
-//                .filter(x -> x.getKey().equals(refType))
-//                .forEach(r -> r.getValue().stream().map(Integer::valueOf).filter(z -> z >= 12)
-//                        .forEach(p -> stock.get(refType).remove(p)));
-////последния ред май само не работи...
 //        System.out.println(stock);
+//        System.out.println(selectMaterial);
 
+        double usedLogsPrice = 0.0;
+        usedLogsPrice = (selectMaterial.stream().mapToInt(Integer::valueOf).sum())*pricePerMeterRounded;
+        double usedLogsPriceRounded = (Math.round(usedLogsPrice*100)) / 100.0;
+        System.out.printf("Used logs price: $%.2f%n", usedLogsPriceRounded);
 
+        int sumOfAllUnusedLogs = 0;
+        for (ArrayList<Integer> arrayOfUnusedLogsValues : stock.values()) {
+            sumOfAllUnusedLogs += arrayOfUnusedLogsValues.stream().mapToInt(Integer::valueOf).sum();
+        }
+        double unusedLogsPrice = 0;
+        unusedLogsPrice = sumOfAllUnusedLogs*pricePerMeterRounded*0.25;
+        System.out.printf("Unused logs price: $%.2f%n", unusedLogsPrice);
+
+        double subtotal = 0;
+        subtotal = usedLogsPriceRounded + unusedLogsPrice;
+        System.out.printf("CottageScraper subtotal: $%.2f", subtotal);
     }
 }
 
